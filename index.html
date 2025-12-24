@@ -1,0 +1,1150 @@
+<!-- © 2026 Benny354912 -->
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DVD Screensaver</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        body {
+            background-color: #000;
+            color: #fff;
+            overflow: hidden;
+            height: 100vh;
+            transition: background-color 0.3s;
+            cursor: none; 
+        }
+
+        body.menu-visible, body.menu-visible * {
+            cursor: auto; 
+        }
+
+        .dvd-logo {
+            position: absolute;
+            font-weight: bold;
+            text-transform: uppercase;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+            transition: color 0.5s, transform 0.2s;
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(2px);
+            min-width: 80px;
+            min-height: 40px;
+        }
+
+        .menu-container {
+            position: fixed;
+            top: 0;
+            right: -320px;
+            width: 300px;
+            height: 100vh;
+            background: rgba(20, 20, 30, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: -5px 0 25px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            transition: right 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .menu-container.active {
+            right: 0;
+        }
+
+        .menu-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .menu-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #4fc3f7;
+        }
+
+        .menu-close {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: #fff;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .menu-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .menu-body {
+            flex-grow: 1;
+        }
+
+        .control-group {
+            margin-bottom: 25px;
+        }
+
+        .control-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #bbbbbb;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .slider {
+            flex-grow: 1;
+            height: 6px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            outline: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #4fc3f7;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.2s;
+        }
+
+        .slider::-webkit-slider-thumb:hover {
+            background: #29b6f6;
+            transform: scale(1.1);
+        }
+
+        .slider-value {
+            min-width: 40px;
+            text-align: center;
+            font-weight: 600;
+            color: #4fc3f7;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 5px;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+
+        .checkbox-custom {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+            margin-right: 10px;
+            position: relative;
+            transition: all 0.2s;
+        }
+
+        .checkbox-custom::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            width: 12px;
+            height: 12px;
+            background: #4fc3f7;
+            border-radius: 2px;
+            transition: transform 0.2s;
+        }
+
+        input[type="checkbox"] {
+            display: none;
+        }
+
+        input[type="checkbox"]:checked + .checkbox-custom {
+            border-color: #4fc3f7;
+        }
+
+        input[type="checkbox"]:checked + .checkbox-custom::after {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .text-input {
+            width: 100%;
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .text-input:focus {
+            border-color: #4fc3f7;
+        }
+
+        .menu-footer {
+            margin-top: auto;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px 0;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .btn-minimize {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .btn-minimize:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-close {
+            background: rgba(244, 67, 54, 0.9);
+            color: white;
+        }
+
+        .btn-close:hover {
+            background: rgba(244, 67, 54, 1);
+        }
+
+        .info-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 20px;
+            font-size: 0.9rem;
+            color: #aaa;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transform: translateY(100%);
+            transition: transform 0.3s, opacity 0.3s;
+            z-index: 999;
+            opacity: 0;
+        }
+
+        .info-bar.active {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .fullscreen-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 500;
+            opacity: 0;
+            transition: opacity 0.3s, background 0.2s, transform 0.3s;
+            transform: translateX(-60px);
+        }
+
+        .fullscreen-btn.visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .fullscreen-btn:hover {
+            background: rgba(0, 0, 0, 0.7);
+        }
+
+        .corner-hit {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            pointer-events: none;
+            z-index: 100;
+            opacity: 0;
+        }
+
+        .corner-hit.active {
+            animation: cornerHitAnimation 1s ease-out;
+        }
+
+        @keyframes cornerHitAnimation {
+            0% {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+            20% {
+                opacity: 1;
+            }
+            100% {
+                transform: scale(2.5);
+                opacity: 0;
+            }
+        }
+
+        .size-preview {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 10px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .size-preview-box {
+            background: #4fc3f7;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+
+        .volume-control {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+            gap: 10px;
+        }
+
+        .volume-icon {
+            color: #4fc3f7;
+        }
+
+        .volume-slider {
+            flex-grow: 1;
+        }
+
+        .sound-test-btn {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            background: rgba(79, 195, 247, 0.2);
+            border: 1px solid rgba(79, 195, 247, 0.3);
+            border-radius: 6px;
+            color: #4fc3f7;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+
+        .sound-test-btn:hover {
+            background: rgba(79, 195, 247, 0.3);
+        }
+
+        .cursor-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: #aaa;
+            z-index: 500;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        .cursor-status.visible {
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            .menu-container {
+                width: 100%;
+                right: -100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dvd-logo" id="dvdLogo">DVD</div>
+    
+    <div class="corner-hit"></div>
+    
+    <button class="fullscreen-btn" id="fullscreenBtn" title="Vollbild (F11)">
+        <svg id="fullscreenIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path id="enterFullscreenIcon" d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+            <path id="exitFullscreenIcon" d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5M15 15l5.25 5.25" 
+                  style="display: none;"/>
+        </svg>
+    </button>
+    
+    <div class="cursor-status" id="cursorStatus">Cursor ausgeblendet</div>
+    
+    <div class="menu-container" id="menuContainer">
+        <div class="menu-header">
+            <h2 class="menu-title">DVD Screensaver</h2>
+            <button class="menu-close" id="menuClose">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        
+        <div class="menu-body">
+            <div class="control-group">
+                <label class="control-label">Geschwindigkeit</label>
+                <div class="slider-container">
+                    <input type="range" min="1" max="20" value="10" class="slider" id="speedSlider">
+                    <span class="slider-value" id="speedValue">10</span>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <label class="control-label">Objekt Größe</label>
+                <div class="slider-container">
+                    <input type="range" min="50" max="200" value="100" class="slider" id="sizeSlider">
+                    <span class="slider-value" id="sizeValue">100%</span>
+                </div>
+                <div class="size-preview">
+                    <div class="size-preview-box" id="sizePreviewBox"></div>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <label class="control-label">Screensaver Text</label>
+                <input type="text" class="text-input" id="textInput" value="DVD">
+            </div>
+            
+            <div class="control-group">
+                <label class="control-label">Ecke perfekt treffen</label>
+                <div class="checkbox-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="cornerHitCheckbox">
+                        <span class="checkbox-custom"></span>
+                        <span>Kann Ecke treffen</span>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <label class="control-label">Treffer-Wahrscheinlichkeit</label>
+                <div class="slider-container">
+                    <input type="range" min="0" max="100" value="10" class="slider" id="probabilitySlider">
+                    <span class="slider-value" id="probabilityValue">10%</span>
+                </div>
+                <div style="margin-top: 5px; font-size: 0.85rem; color: #888;">
+                    Wenn aktiviert, Wahrscheinlichkeit dass die Ecke perfekt getroffen wird
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <label class="control-label">Soundeffekte</label>
+                <div class="checkbox-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="soundEnabledCheckbox" checked>
+                        <span class="checkbox-custom"></span>
+                        <span>Soundeffekte aktivieren</span>
+                    </label>
+                </div>
+                
+                <div class="checkbox-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="wallSoundCheckbox" checked>
+                        <span class="checkbox-custom"></span>
+                        <span>Wandkollision Sound</span>
+                    </label>
+                </div>
+                
+                <div class="checkbox-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="cornerSoundCheckbox" checked>
+                        <span class="checkbox-custom"></span>
+                        <span>Ecken-Treffer Sound</span>
+                    </label>
+                </div>
+                
+                <div class="volume-control">
+                    <span class="volume-icon">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M11 5L6 9H2v6h4l5 4V5z"></path>
+                            <path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07"></path>
+                        </svg>
+                    </span>
+                    <input type="range" min="0" max="100" value="50" class="slider volume-slider" id="volumeSlider">
+                    <span class="slider-value" id="volumeValue">50%</span>
+                </div>
+                
+                <button class="sound-test-btn" id="soundTestBtn">Sound testen</button>
+            </div>
+            
+            <div class="control-group">
+                <label class="control-label">Cursor-Einstellungen</label>
+                <div class="checkbox-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="cursorHideCheckbox" checked>
+                        <span class="checkbox-custom"></span>
+                        <span>Cursor automatisch ausblenden</span>
+                    </label>
+                </div>
+                <div style="margin-top: 5px; font-size: 0.85rem; color: #888;">
+                    Cursor wird ausgeblendet, wenn Menü nicht sichtbar ist
+                </div>
+            </div>
+        </div>
+        
+        <div class="menu-footer">
+            <div class="button-group">
+                <button class="btn btn-minimize" id="minimizeBtn">Vollbild beenden</button>
+                <button class="btn btn-close" id="closeBtn">Schließen</button>
+            </div>
+            <div style="margin-top: 15px; font-size: 0.8rem; color: #666; text-align: center;">
+                Bewege die Maus, um dieses Menü anzuzeigen <br><br> © 2026 Benny354912
+            </div>
+        </div>
+    </div>
+    
+    <div class="info-bar" id="infoBar">
+        <div>DVD Screensaver - Drücke F11 oder ESC für Vollbildmodus - © 2026 Benny354912</div>
+        <div id="cornerCounter">Ecken getroffen: 0</div>
+    </div>
+
+    <script>
+        const dvdLogo = document.getElementById('dvdLogo');
+        const menuContainer = document.getElementById('menuContainer');
+        const menuClose = document.getElementById('menuClose');
+        const speedSlider = document.getElementById('speedSlider');
+        const speedValue = document.getElementById('speedValue');
+        const sizeSlider = document.getElementById('sizeSlider');
+        const sizeValue = document.getElementById('sizeValue');
+        const textInput = document.getElementById('textInput');
+        const cornerHitCheckbox = document.getElementById('cornerHitCheckbox');
+        const probabilitySlider = document.getElementById('probabilitySlider');
+        const probabilityValue = document.getElementById('probabilityValue');
+        const minimizeBtn = document.getElementById('minimizeBtn');
+        const closeBtn = document.getElementById('closeBtn');
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        const infoBar = document.getElementById('infoBar');
+        const cornerCounter = document.getElementById('cornerCounter');
+        const cornerHitElement = document.querySelector('.corner-hit');
+        const enterFullscreenIcon = document.getElementById('enterFullscreenIcon');
+        const exitFullscreenIcon = document.getElementById('exitFullscreenIcon');
+        const sizePreviewBox = document.getElementById('sizePreviewBox');
+        const soundEnabledCheckbox = document.getElementById('soundEnabledCheckbox');
+        const wallSoundCheckbox = document.getElementById('wallSoundCheckbox');
+        const cornerSoundCheckbox = document.getElementById('cornerSoundCheckbox');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const volumeValue = document.getElementById('volumeValue');
+        const soundTestBtn = document.getElementById('soundTestBtn');
+        const cursorHideCheckbox = document.getElementById('cursorHideCheckbox');
+        const cursorStatus = document.getElementById('cursorStatus');
+
+        let audioContext;
+        let masterGainNode;
+        
+        function initAudio() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                masterGainNode = audioContext.createGain();
+                masterGainNode.connect(audioContext.destination);
+                updateVolume();
+            } catch (error) {
+                console.error('Audio-Kontext konnte nicht initialisiert werden:', error);
+                soundEnabledCheckbox.checked = false;
+                soundEnabledCheckbox.disabled = true;
+                wallSoundCheckbox.disabled = true;
+                cornerSoundCheckbox.disabled = true;
+                volumeSlider.disabled = true;
+            }
+        }
+        
+        function playWallSound() {
+            if (!soundEnabledCheckbox.checked || !wallSoundCheckbox.checked || !audioContext) return;
+            
+            try {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(masterGainNode);
+                
+                oscillator.frequency.value = 300 + Math.random() * 100;
+                oscillator.type = 'sine';
+                
+                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+                
+                oscillator.start();
+                oscillator.stop(audioContext.currentTime + 0.2);
+            } catch (error) {
+                console.error('Fehler beim Abspielen des Wand-Sounds:', error);
+            }
+        }
+        
+        function playCornerSound() {
+            if (!soundEnabledCheckbox.checked || !cornerSoundCheckbox.checked || !audioContext) return;
+            
+            try {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(masterGainNode);
+                
+                oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.5);
+                oscillator.type = 'sawtooth';
+                
+                gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+                
+                oscillator.start();
+                oscillator.stop(audioContext.currentTime + 0.5);
+            } catch (error) {
+                console.error('Fehler beim Abspielen des Ecken-Sounds:', error);
+            }
+        }
+        
+        function updateVolume() {
+            if (!masterGainNode) return;
+            
+            const volume = volumeSlider.value / 100;
+            masterGainNode.gain.setValueAtTime(volume, audioContext.currentTime);
+            volumeValue.textContent = `${volumeSlider.value}%`;
+        }
+        
+        function testSound() {
+            if (!soundEnabledCheckbox.checked || !audioContext) return;
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(masterGainNode);
+            
+            oscillator.frequency.value = 523.25;
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+            
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 0.3);
+        }
+
+        let x = 100;
+        let y = 100;
+        let dx = 3;
+        let dy = 2;
+        let speed = 10;
+        let baseLogoWidth = 120;
+        let baseLogoHeight = 60;
+        let logoWidth = baseLogoWidth;
+        let logoHeight = baseLogoHeight;
+        let sizeScale = 1.0;
+        let colors = ['#FF5722', '#4CAF50', '#2196F3', '#FFC107', '#9C27B0', '#00BCD4'];
+        let currentColorIndex = 0;
+        let cornerHitEnabled = false;
+        let cornerHitProbability = 10;
+        let cornersHit = 0;
+        let lastCornerHitTime = 0;
+        let mouseMoveTimer = null;
+        let menuVisible = false;
+        let isFullscreen = false;
+        let cursorHidden = true;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initAudio();
+            
+            updateLogoSize();
+            updateSizePreview();
+            
+            updateCursorStatus();
+            
+            setTimeout(() => {
+                enterFullscreen();
+                showInfoBar();
+                updateFullscreenButton();
+                hideCursor();
+            }, 500);
+            
+            animate();
+            
+            setTimeout(() => {
+                hideInfoBar();
+            }, 5000);
+            
+            document.addEventListener('fullscreenchange', handleFullscreenChange);
+            document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+            document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+            document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+        });
+
+        function animate() {
+            const speedFactor = speed / 10;
+            x += dx * speedFactor;
+            y += dy * speedFactor;
+            
+            const windowWidth = window.innerWidth;
+            const windowHeight = window.innerHeight;
+            
+            let wallHit = false;
+            if (x <= 0) {
+                dx = Math.abs(dx);
+                changeColor();
+                checkCornerHit(0, y);
+                wallHit = true;
+            } else if (x + logoWidth >= windowWidth) {
+                dx = -Math.abs(dx);
+                changeColor();
+                checkCornerHit(windowWidth, y);
+                wallHit = true;
+            }
+            
+            if (y <= 0) {
+                dy = Math.abs(dy);
+                changeColor();
+                checkCornerHit(x, 0);
+                wallHit = true;
+            } else if (y + logoHeight >= windowHeight) {
+                dy = -Math.abs(dy);
+                changeColor();
+                checkCornerHit(x, windowHeight);
+                wallHit = true;
+            }
+            
+            if (wallHit) {
+                playWallSound();
+            }
+            
+            dvdLogo.style.left = `${x}px`;
+            dvdLogo.style.top = `${y}px`;
+            
+            requestAnimationFrame(animate);
+        }
+
+        function changeColor() {
+            currentColorIndex = (currentColorIndex + 1) % colors.length;
+            dvdLogo.style.color = colors[currentColorIndex];
+            dvdLogo.style.backgroundColor = `${colors[currentColorIndex]}20`;
+        }
+
+        function checkCornerHit(hitX, hitY) {
+            const windowWidth = window.innerWidth;
+            const windowHeight = window.innerHeight;
+            const cornerThreshold = 5;
+            
+            const isNearCorner = 
+                (hitX <= cornerThreshold && hitY <= cornerThreshold) || 
+                (hitX >= windowWidth - cornerThreshold && hitY <= cornerThreshold) || 
+                (hitX <= cornerThreshold && hitY >= windowHeight - cornerThreshold) || 
+                (hitX >= windowWidth - cornerThreshold && hitY >= windowHeight - cornerThreshold); 
+            
+            if (isNearCorner && cornerHitEnabled) {
+                const randomValue = Math.random() * 100;
+                if (randomValue <= cornerHitProbability) {
+                    triggerCornerHit(hitX, hitY);
+                }
+            }
+        }
+
+        function triggerCornerHit(x, y) {
+            const now = Date.now();
+            if (now - lastCornerHitTime < 1000) return;
+            
+            lastCornerHitTime = now;
+            cornersHit++;
+            cornerCounter.textContent = `Ecken getroffen: ${cornersHit}`;
+            
+            cornerHitElement.style.left = `${x}px`;
+            cornerHitElement.style.top = `${y}px`;
+            cornerHitElement.style.backgroundColor = colors[currentColorIndex];
+            
+            cornerHitElement.classList.remove('active');
+            void cornerHitElement.offsetWidth;
+            cornerHitElement.classList.add('active');
+            
+            playCornerSound();
+            
+            dvdLogo.style.transform = 'scale(1.2)';
+            setTimeout(() => {
+                dvdLogo.style.transform = 'scale(1)';
+            }, 300);
+        }
+
+        function updateLogoSize() {
+            dvdLogo.textContent = textInput.value || "DVD";
+            logoWidth = baseLogoWidth * sizeScale;
+            logoHeight = baseLogoHeight * sizeScale;
+            
+            dvdLogo.style.width = `${logoWidth}px`;
+            dvdLogo.style.height = `${logoHeight}px`;
+            dvdLogo.style.fontSize = `${16 * sizeScale}px`;
+            dvdLogo.style.lineHeight = `${logoHeight}px`;
+            
+            if (x + logoWidth > window.innerWidth) {
+                x = window.innerWidth - logoWidth;
+            }
+            if (y + logoHeight > window.innerHeight) {
+                y = window.innerHeight - logoHeight;
+            }
+        }
+
+        function updateSizePreview() {
+            const previewSize = 40 * sizeScale;
+            sizePreviewBox.style.width = `${previewSize}px`;
+            sizePreviewBox.style.height = `${previewSize * 0.5}px`;
+        }
+
+        function hideCursor() {
+            if (!cursorHideCheckbox.checked) return;
+            
+            document.body.classList.remove('menu-visible');
+            cursorHidden = true;
+            updateCursorStatus();
+        }
+        
+        function showCursor() {
+            document.body.classList.add('menu-visible');
+            cursorHidden = false;
+            updateCursorStatus();
+        }
+        
+        function updateCursorStatus() {
+            if (cursorHidden) {
+                cursorStatus.textContent = "Cursor ausgeblendet";
+                cursorStatus.classList.add('visible');
+                
+                // Statusanzeige nach 2 Sekunden ausblenden
+                setTimeout(() => {
+                    cursorStatus.classList.remove('visible');
+                }, 2000);
+            } else {
+                cursorStatus.textContent = "Cursor sichtbar";
+                cursorStatus.classList.add('visible');
+            }
+        }
+
+        speedSlider.addEventListener('input', function() {
+            speed = this.value;
+            speedValue.textContent = speed;
+        });
+
+        sizeSlider.addEventListener('input', function() {
+            sizeScale = this.value / 100;
+            sizeValue.textContent = `${this.value}%`;
+            updateLogoSize();
+            updateSizePreview();
+        });
+
+        textInput.addEventListener('input', function() {
+            updateLogoSize();
+        });
+
+        cornerHitCheckbox.addEventListener('change', function() {
+            cornerHitEnabled = this.checked;
+            probabilitySlider.disabled = !this.checked;
+            
+            if (!this.checked) {
+                probabilityValue.style.color = '#666';
+            } else {
+                probabilityValue.style.color = '#4fc3f7';
+            }
+        });
+
+        probabilitySlider.addEventListener('input', function() {
+            cornerHitProbability = this.value;
+            probabilityValue.textContent = `${cornerHitProbability}%`;
+        });
+        
+        volumeSlider.addEventListener('input', updateVolume);
+        
+        soundTestBtn.addEventListener('click', function() {
+            testSound();
+            
+            soundTestBtn.textContent = "Sound abgespielt!";
+            soundTestBtn.style.backgroundColor = "rgba(76, 175, 80, 0.3)";
+            
+            setTimeout(() => {
+                soundTestBtn.textContent = "Sound testen";
+                soundTestBtn.style.backgroundColor = "rgba(79, 195, 247, 0.2)";
+            }, 500);
+        });
+        
+        cursorHideCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                if (!menuVisible) {
+                    hideCursor();
+                }
+            } else {
+                showCursor();
+            }
+        });
+
+        let mouseMoveTimeout;
+        document.addEventListener('mousemove', () => {
+            if (cursorHideCheckbox.checked) {
+                showCursor();
+            }
+            
+            if (!menuVisible) {
+                menuContainer.classList.add('active');
+                menuVisible = true;
+                showFullscreenButton();
+            }
+            
+            showInfoBar();
+            
+            clearTimeout(mouseMoveTimeout);
+            mouseMoveTimeout = setTimeout(() => {
+                menuContainer.classList.remove('active');
+                menuVisible = false;
+                hideInfoBar();
+                hideFullscreenButton();
+                
+                if (cursorHideCheckbox.checked) {
+                    hideCursor();
+                }
+                
+                if (!isFullscreen) {
+                    enterFullscreen();
+                }
+            }, 5000);
+        });
+
+        menuClose.addEventListener('click', () => {
+            menuContainer.classList.remove('active');
+            menuVisible = false;
+            hideFullscreenButton();
+            
+            if (cursorHideCheckbox.checked) {
+                hideCursor();
+            }
+            
+            if (!isFullscreen) {
+                enterFullscreen();
+            }
+        });
+
+        function enterFullscreen() {
+            if (!document.fullscreenElement) {
+                const element = document.documentElement;
+                
+                if (element.requestFullscreen) {
+                    element.requestFullscreen().catch(err => {
+                        console.error(`Fehler beim Aktivieren des Vollbildmodus: ${err.message}`);
+                    });
+                } else if (element.mozRequestFullScreen) {
+                    element.mozRequestFullScreen();
+                } else if (element.webkitRequestFullscreen) {
+                    element.webkitRequestFullscreen();
+                } else if (element.msRequestFullscreen) {
+                    element.msRequestFullscreen();
+                }
+            }
+        }
+
+        function exitFullscreen() {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.mozCancelFullScreen) {
+                document.mozCancelFullScreen();
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            } else if (document.msExitFullscreen) {
+                document.msExitFullscreen();
+            }
+        }
+
+        function toggleFullscreen() {
+            if (!isFullscreen) {
+                enterFullscreen();
+            } else {
+                exitFullscreen();
+            }
+        }
+
+        function handleFullscreenChange() {
+            isFullscreen = !!(document.fullscreenElement || 
+                              document.mozFullScreenElement || 
+                              document.webkitFullscreenElement || 
+                              document.msFullscreenElement);
+            
+            updateFullscreenButton();
+            
+            if (!isFullscreen) {
+                showFullscreenButton();
+                showInfoBar();
+            }
+        }
+
+        function updateFullscreenButton() {
+            if (isFullscreen) {
+                enterFullscreenIcon.style.display = 'none';
+                exitFullscreenIcon.style.display = 'block';
+                fullscreenBtn.title = 'Vollbild beenden (F11)';
+                minimizeBtn.textContent = 'Vollbild beenden';
+            } else {
+                enterFullscreenIcon.style.display = 'block';
+                exitFullscreenIcon.style.display = 'none';
+                fullscreenBtn.title = 'Vollbild aktivieren (F11)';
+                minimizeBtn.textContent = 'Vollbild aktivieren';
+            }
+        }
+
+        function showFullscreenButton() {
+            fullscreenBtn.classList.add('visible');
+        }
+
+        function hideFullscreenButton() {
+            fullscreenBtn.classList.remove('visible');
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' || e.key === 'F11') {
+                e.preventDefault();
+                toggleFullscreen();
+                
+                if (!isFullscreen) {
+                    showFullscreenButton();
+                    showInfoBar();
+                }
+            }
+            
+            if (e.key === 'm' || e.key === 'M') {
+                menuContainer.classList.toggle('active');
+                menuVisible = !menuVisible;
+                
+                if (menuVisible) {
+                    showFullscreenButton();
+                    if (cursorHideCheckbox.checked) {
+                        showCursor();
+                    }
+                } else {
+                    hideFullscreenButton();
+                    if (cursorHideCheckbox.checked) {
+                        hideCursor();
+                    }
+                    if (!isFullscreen) {
+                        enterFullscreen();
+                    }
+                }
+            }
+            
+            if (e.key === 'c' || e.key === 'C') {
+                cursorHideCheckbox.checked = !cursorHideCheckbox.checked;
+                if (cursorHideCheckbox.checked && !menuVisible) {
+                    hideCursor();
+                } else {
+                    showCursor();
+                }
+            }
+        });
+
+        fullscreenBtn.addEventListener('click', () => {
+            toggleFullscreen();
+            
+            if (!isFullscreen) {
+                showFullscreenButton();
+                showInfoBar();
+            }
+        });
+
+        minimizeBtn.addEventListener('click', toggleFullscreen);
+        
+        closeBtn.addEventListener('click', () => {
+            if (isFullscreen) {
+                exitFullscreen();
+            }
+            
+            setTimeout(() => {
+                window.close();
+                
+                if (!window.closed) {
+                    alert("Fenster kann nicht geschlossen werden. Bitte schließen Sie das Fenster manuell.");
+                }
+            }, 300);
+        });
+
+        function showInfoBar() {
+            infoBar.classList.add('active');
+        }
+
+        function hideInfoBar() {
+            infoBar.classList.remove('active');
+        }
+
+        window.addEventListener('resize', () => {
+            if (x + logoWidth > window.innerWidth) {
+                x = window.innerWidth - logoWidth;
+            }
+            if (y + logoHeight > window.innerHeight) {
+                y = window.innerHeight - logoHeight;
+            }
+        });
+
+        changeColor();
+        
+        probabilitySlider.disabled = !cornerHitCheckbox.checked;
+        if (!cornerHitCheckbox.checked) {
+            probabilityValue.style.color = '#666';
+        }
+        
+        document.addEventListener('click', function() {
+            if (audioContext && audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+        });
+    </script>
+</body>
+</html>
+
+<!-- © 2026 Benny354912 -->
